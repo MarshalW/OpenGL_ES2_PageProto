@@ -35,7 +35,8 @@ public class Page {
             -1f, -1f, 0,
             1f, 1f, 0,
             0f, -1f, 0,
-            1f, 0f, 0f
+            1f, 0f, 0f,
+            -0.5f, -0.5f, 0f
     };
 
     private float[] color = {
@@ -47,7 +48,8 @@ public class Page {
             0f, 1f,
             1f, 0f,
             0.5f, 1f,
-            1f, 0.5f
+            1f, 0.5f,
+            1f, 1f
     };
 
     private RectF viewRect;
@@ -66,7 +68,7 @@ public class Page {
     }
 
     public void onDrawFrame(PageShader textureShader) {
-        Log.d("glDemo","page on draw frame");
+        Log.d("glDemo", "page on draw frame");
 
         //设置数据
         this.setData();
