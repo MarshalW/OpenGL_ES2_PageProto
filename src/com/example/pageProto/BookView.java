@@ -31,4 +31,6 @@ public class BookView extends GLSurfaceView {
         this.setRenderer(this.renderer);
         this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
+
+
 }

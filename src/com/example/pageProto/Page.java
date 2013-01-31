@@ -5,6 +5,7 @@ import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -21,11 +22,13 @@ public class Page {
 
     private Context context;
 
-    private int[] textureIds = new int[1];
+    private int[] textureIds;
 
     private FloatBuffer verticesBuffer;
     private FloatBuffer texCoordsBuffer;
     private FloatBuffer colorBuffer;
+
+    private boolean isLoaded;
 
     private float[] pageRect = {
             -1f, 1f, 0,
@@ -43,10 +46,9 @@ public class Page {
             0f, 0f,
             0f, 1f,
             1f, 0f,
-            0.5f,1f,
+            0.5f, 1f,
             1f, 0.5f
     };
-
 
     private RectF viewRect;
 
@@ -64,12 +66,17 @@ public class Page {
     }
 
     public void onDrawFrame(PageShader textureShader) {
+        Log.d("glDemo","page on draw frame");
+
         //设置数据
         this.setData();
 
         /**
          * 设置纹理属性，加载纹理
          */
+
+        this.textureIds = new int[1];
+
         GLES20.glGenTextures(1, this.textureIds, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[0]);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
@@ -82,7 +89,7 @@ public class Page {
                 GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, this.textureIds[0]);
-        int width = (int) viewRect.width() - 100 * 2;
+        int width = ((int) viewRect.width() - 100 * 2);
         int height = (int) (width * (viewRect.height() / viewRect.width()));
         Bitmap texture = this.loadBitmap(width, height, R.drawable.zhufeng);
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, texture, 0);

@@ -6,6 +6,7 @@ import android.graphics.RectF;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -53,6 +54,8 @@ public class BookRenderer implements GLSurfaceView.Renderer {
 
     private Page page;
 
+    private int lastWidth = -1;
+
     private PageShader textureShader = new PageShader();
 
     private final float[] projectionMatrix = new float[16];
@@ -63,6 +66,7 @@ public class BookRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        Log.d("glDemo", ">>>>on surface created");
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDisable(GLES20.GL_CULL_FACE);
 
@@ -71,13 +75,19 @@ public class BookRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
-        //设置视口为全屏
-        GLES20.glViewport(0, 0, width, height);
-        page.setViewRect(new RectF(0, 0, width, height));
+        Log.d("glDemo", ">>>>on surface changed, width:" + width + ", height:" + height);
 
-        //使用正交投影，设置长宽比
-        float ratio = (float) width / height;
-        Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, -10f, 10f);
+        if (lastWidth != width) {
+            //设置视口为全屏
+            GLES20.glViewport(0, 0, width, height);
+            page.setViewRect(new RectF(0, 0, width, height));
+
+            //使用正交投影，设置长宽比
+            float ratio = (float) width / height;
+            Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, -10f, 10f);
+
+            lastWidth = width;
+        }
 
         this.textureShader.useProgram();
         GLES20.glUniformMatrix4fv(this.textureShader.getHandle("uProjectionM"), 1, false, this.projectionMatrix, 0);
@@ -85,12 +95,15 @@ public class BookRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
+        Log.d("glDemo", "render on draw frame");
         GLES20.glClearColor(Color.red(backgroundColor) / 255f,
                 Color.green(backgroundColor) / 255f,
                 Color.blue(backgroundColor) / 255f,
                 Color.alpha(backgroundColor) / 255f);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+//        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT |
+                GLES20.GL_DEPTH_BUFFER_BIT);
 
-        this.page.onDrawFrame(this.textureShader);
+        this.page.onDrawFrame(this.textureShader);//
     }
 }
