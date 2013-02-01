@@ -66,7 +66,7 @@ public class BookRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        Log.d("glDemo", ">>>>on surface created");
+//        Log.d("glDemo", ">>>>on surface created");
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDisable(GLES20.GL_CULL_FACE);
 
@@ -75,8 +75,7 @@ public class BookRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
-        Log.d("glDemo", ">>>>on surface changed, width:" + width + ", height:" + height);
-
+//        Log.d("glDemo", ">>>>on surface changed, width:" + width + ", height:" + height);
         if (lastWidth != width) {
             //设置视口为全屏
             GLES20.glViewport(0, 0, width, height);
@@ -95,7 +94,7 @@ public class BookRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
-        Log.d("glDemo", "render on draw frame");
+//        Log.d("glDemo", "render on draw frame");
         GLES20.glClearColor(Color.red(backgroundColor) / 255f,
                 Color.green(backgroundColor) / 255f,
                 Color.blue(backgroundColor) / 255f,

@@ -10,6 +10,8 @@ import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,32 +26,14 @@ public class Page {
 
     private int[] textureIds;
 
-    private FloatBuffer verticesBuffer;
+    private FloatBuffer vertexesBuffer;
     private FloatBuffer texCoordsBuffer;
     private FloatBuffer colorBuffer;
 
-    private boolean isLoaded;
-
-    private float[] pageRect = {
-            -1f, 1f, 0,
-            -1f, -1f, 0,
-            1f, 1f, 0,
-            0f, -1f, 0,
-            1f, 0f, 0f,
-            -0.5f, -0.5f, 0f
-    };
+    private List<Vertex> vertexes;
 
     private float[] color = {
             1f, 1f, 1f, 1f
-    };
-
-    private float[] texCoods = {
-            0f, 0f,
-            0f, 1f,
-            1f, 0f,
-            0.5f, 1f,
-            1f, 0.5f,
-            1f, 1f
     };
 
     private RectF viewRect;
@@ -60,16 +44,9 @@ public class Page {
 
     public void setViewRect(RectF viewRect) {
         this.viewRect = viewRect;
-
-        float x = viewRect.width() / viewRect.height();
-        for (int i = 0; i < pageRect.length; i += 3) {
-            pageRect[i] = pageRect[i] * x;
-        }
     }
 
     public void onDrawFrame(PageShader textureShader) {
-        Log.d("glDemo", "page on draw frame");
-
         //设置数据
         this.setData();
 
@@ -105,7 +82,7 @@ public class Page {
 
         //设置顶点属性
         GLES20.glVertexAttribPointer(aPosition, 3, GLES20.GL_FLOAT, false, 0,
-                this.verticesBuffer);
+                this.vertexesBuffer);
         GLES20.glEnableVertexAttribArray(aPosition);
         GLES20.glVertexAttribPointer(aColor, 4, GLES20.GL_FLOAT, false, 0,
                 this.colorBuffer);
@@ -116,50 +93,101 @@ public class Page {
 
         //设置纹理属性
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, this.textureIds[0]);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, this.pageRect.length / 3);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, this.vertexes.size());
 
         GLES20.glDisable(GLES20.GL_TEXTURE_2D);
     }
 
     private void setData() {
-        this.setVertices();
-        this.setColor();
-        this.setTexCoords();
-    }
+        float radio = this.viewRect.width() / this.viewRect.height();
+        this.vertexes = new ArrayList<Vertex>();
 
-    /**
-     * 设置顶点坐标
-     */
-    private void setVertices() {
-        ByteBuffer buffer = ByteBuffer.allocateDirect(this.pageRect.length * 4);
+        //设置左上顶点
+        Vertex v = new Vertex();
+        v.positionX = -1 * radio;
+        v.positionY = 1;
+        v.positionZ = 0;
+
+        v.textureX = 0;
+        v.textureY = 0;
+
+        this.vertexes.add(v);
+
+        //设置左下顶点
+        v = new Vertex();
+        v.positionX = -1 * radio;
+        v.positionY = -1;
+        v.positionZ = 0;
+
+        v.textureX = 0;
+        v.textureY = 1;
+
+        this.vertexes.add(v);
+
+        //设置右上顶点
+        v = new Vertex();
+        v.positionX = 1 * radio;
+        v.positionY = 1;
+        v.positionZ = 0;
+
+        v.textureX = 1;
+        v.textureY = 0;
+
+        this.vertexes.add(v);
+
+        //设置右下顶点
+        v = new Vertex();
+        v.positionX = 0;
+        v.positionY = -1;
+        v.positionZ = 0;
+
+        v.textureX = .5f;
+        v.textureY = 1;
+
+        this.vertexes.add(v);
+
+        //设置右偏下顶点
+        v = new Vertex();
+        v.positionX = 1 * radio;
+        v.positionY = 0;
+        v.positionZ = 0;
+
+        v.textureX = 1;
+        v.textureY = .5f;
+
+        this.vertexes.add(v);
+
+        //设置顶点坐标buffer
+        ByteBuffer buffer = ByteBuffer.allocateDirect(this.vertexes.size() * 3 * 4);
         buffer.order(ByteOrder.nativeOrder());
-        this.verticesBuffer = buffer.asFloatBuffer();
-        verticesBuffer.put(this.pageRect);
-        verticesBuffer.position(0);
-    }
+        this.vertexesBuffer = buffer.asFloatBuffer();
 
-    /**
-     * 设置顶点纹理坐标
-     */
-    private void setTexCoords() {
-        ByteBuffer buffer = ByteBuffer.allocateDirect(this.texCoods.length * 4);
+        buffer = ByteBuffer.allocateDirect(this.vertexes.size() * 2 * 4);
         buffer.order(ByteOrder.nativeOrder());
         this.texCoordsBuffer = buffer.asFloatBuffer();
-        texCoordsBuffer.put(this.texCoods);
-        texCoordsBuffer.position(0);
-    }
 
-    /**
-     * 设置顶点颜色
-     */
-    private void setColor() {
-        ByteBuffer buffer = ByteBuffer.allocateDirect(this.pageRect.length * 4 * 4);
+        buffer = ByteBuffer.allocateDirect(this.vertexes.size() * 4 * 4);
         buffer.order(ByteOrder.nativeOrder());
         this.colorBuffer = buffer.asFloatBuffer();
-        for (int i = 0; i < this.pageRect.length / 3; i++) {
-            this.colorBuffer.put(this.color);
+
+        for (Vertex vertex : this.vertexes) {
+            this.addVertex(vertex);
         }
-        this.colorBuffer.position(0);
+
+        vertexesBuffer.position(0);
+        texCoordsBuffer.position(0);
+        colorBuffer.position(0);
+    }
+
+    private void addVertex(Vertex v) {
+        vertexesBuffer.put(v.positionX);
+        vertexesBuffer.put(v.positionY);
+        vertexesBuffer.put(v.positionZ);
+
+        texCoordsBuffer.put(v.textureX);
+        texCoordsBuffer.put(v.textureY);
+
+        colorBuffer.put(this.color);
     }
 
     private Bitmap loadBitmap(int width, int height, int bitmapId) {
@@ -199,5 +227,14 @@ public class Page {
         d.draw(c);
 
         return b;
+    }
+
+    private class Vertex {
+        float positionX;
+        float positionY;
+        float positionZ;
+
+        float textureX;
+        float textureY;
     }
 }
