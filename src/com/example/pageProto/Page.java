@@ -157,6 +157,18 @@ public class Page {
 
         this.vertexes.add(v);
 
+        //设置反转顶点
+        double alpha=.5*Math.PI-2*Math.atan(radio);
+        v = new Vertex();
+        v.positionX = -0.2427f;
+        v.positionY = -0.35f;
+        v.positionZ = 0;
+
+        v.textureX = 1;
+        v.textureY = 1;
+
+        this.vertexes.add(v);
+
         //设置顶点坐标buffer
         ByteBuffer buffer = ByteBuffer.allocateDirect(this.vertexes.size() * 3 * 4);
         buffer.order(ByteOrder.nativeOrder());
